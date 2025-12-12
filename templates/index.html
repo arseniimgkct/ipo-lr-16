@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вариант 5</title>
+</head>
+<style>
+    .form__wrapper {
+    display: flex;
+    height: 90vh;
+    gap: 30px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.form__input{
+    display: flex;
+    flex-direction: column;
+}
+</style>
+<body>
+    <form action="/process" method="post" enctype="multipart/form-data">
+        <div class="form__wrapper">
+            <div class="form__input">
+                <label for="file">
+                    Выберите excel файл
+                </label>
+                <input type="file" name="file" id="file" required>
+            </div>
+            <div class="form__input">
+                <label for="number">
+                    Минимальная сумма сделки:
+                </label>
+                <input type="number" name="number" id="number">
+            </div>
+            <button type="submit">Отправить</button>
+        </div>
+        </form>
+</body>
+</html>
