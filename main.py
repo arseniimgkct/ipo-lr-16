@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, send_file
 import pandas as pd
 import io
 
@@ -10,9 +10,6 @@ def handle_index():
     
 @app.route('/process', methods=["POST"])
 def handle_process():
-    if request.method == 'GET':
-        return 'Method not allowed', 405
-
     if 'file' not in request.files:
         return 'Invalid Arguments', 400 
 
@@ -25,19 +22,31 @@ def handle_process():
     
     min_deal_cost = int(request.form.get("number"))
 
-    manager_bonus = []
-    
-    filtered = df[df['Сумма сделки'] >= min_deal_cost]
-    
-    deals_sums = filtered['Сумма сделки']
-    for d in deals_sums:
-        manager_bonus.append(int(d) * 0.1)
-    
-    filtered['Бонус менеджера'] = manager_bonus
+    filtered = df[df['Сумма сделки'] >= min_deal_cost].copy()
 
-    filtered.add
-    
-    return "", 200
+    filtered['Бонус менеджера'] = filtered['Сумма сделки'] * 0.10
+
+    summary = (
+        df.groupby('Менеджер')['Сумма сделки']
+        .sum()
+        .reset_index()
+        .rename(columns={'Сумма сделки': 'Сумма продаж'})
+    )
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        filtered.to_excel(writer, sheet_name='Детализация', index=False)
+        summary.to_excel(writer, sheet_name='Сводка', index=False)
+
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name='result.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
 
 if __name__ == '__main__':
     app.run()
